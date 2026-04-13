@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered source code analysis and generation system using deep neural networks. Generate, analyze, and evaluate code with advanced metrics and visual insights.">
+    <title>CodeIntel AI — Source Code Analysis & Generation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <header class="app-header" id="app-header">
+        <div class="header-brand">
+            <div class="logo-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <path d="M20 2L37 11V29L20 38L3 29V11L20 2Z" stroke="url(#grad1)" stroke-width="2" fill="none"/>
+                    <path d="M20 8L31 14V26L20 32L9 26V14L20 8Z" fill="url(#grad2)" opacity="0.3"/>
+                    <path d="M14 16L18 20L14 24" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="20" y1="24" x2="27" y2="24" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="grad1" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" style="stop-color:#6366f1"/>
+                            <stop offset="100%" style="stop-color:#06b6d4"/>
+                        </linearGradient>
+                        <linearGradient id="grad2" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" style="stop-color:#6366f1"/>
+                            <stop offset="100%" style="stop-color:#06b6d4"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>CodeIntel AI</h1>
+                <span class="tagline">Deep Neural Network Code Analysis</span>
+            </div>
+        </div>
+        <div class="header-status">
+            <div class="status-dot pulse"></div>
+            <span>LSTM Model Active</span>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- MAIN LAYOUT -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="app-layout">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="sidebar" id="sidebar">
+            <div class="nav-section">
+                <div class="nav-label">TOOLS</div>
+                <button class="nav-item active" data-tab="generate" id="nav-generate">
+                    <span class="nav-icon">⚡</span>
+                    <span class="nav-text">Generate Code</span>
+                </button>
+                <button class="nav-item" data-tab="analyze" id="nav-analyze">
+                    <span class="nav-icon">🔬</span>
+                    <span class="nav-text">Analyze Code</span>
+                </button>
+                <button class="nav-item" data-tab="compare" id="nav-compare">
+                    <span class="nav-icon">🔀</span>
+                    <span class="nav-text">Compare Code</span>
+                </button>
+                <button class="nav-item" data-tab="upload" id="nav-upload">
+                    <span class="nav-icon">📁</span>
+                    <span class="nav-text">Upload File</span>
+                </button>
+            </div>
+            <div class="nav-section">
+                <div class="nav-label">LANGUAGES</div>
+                <div class="lang-selector">
+                    <button class="lang-btn active" data-lang="python" id="lang-python">Python</button>
+                    <button class="lang-btn" data-lang="java" id="lang-java">Java</button>
+                    <button class="lang-btn" data-lang="cpp" id="lang-cpp">C++</button>
+                </div>
+            </div>
+            <div class="nav-section sidebar-info">
+                <div class="nav-label">MODEL</div>
+                <div class="model-info">
+                    <div class="model-chip">LSTM</div>
+                    <div class="model-chip">Transformer</div>
+                </div>
+                <div class="model-detail">
+                    <span>Vocab Size:</span> <span>5,000</span>
+                </div>
+                <div class="model-detail">
+                    <span>Hidden Dim:</span> <span>256</span>
+                </div>
+                <div class="model-detail">
+                    <span>Layers:</span> <span>2</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content" id="main-content">
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <!-- TAB: GENERATE CODE -->
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <section class="tab-panel active" id="panel-generate">
+                <div class="panel-header">
+                    <h2>⚡ AI Code Generation</h2>
+                    <p>Describe what you need in natural language and our LSTM model will generate the code.</p>
+                </div>
+
+                <div class="generate-layout">
+                    <div class="input-section">
+                        <div class="card glass">
+                            <h3>Natural Language Input</h3>
+                            <textarea class="nl-input" id="generate-prompt" placeholder="e.g., Write a binary search function that searches for a target in a sorted array..."></textarea>
+                            <div class="input-actions">
+                                <select id="generate-language" class="select-input">
+                                    <option value="python">Python</option>
+                                    <option value="java">Java</option>
+                                    <option value="cpp">C++</option>
+                                </select>
+                                <button class="btn btn-primary" id="btn-generate" onclick="handleGenerate()">
+                                    <span class="btn-icon">⚡</span> Generate Code
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Templates -->
+                        <div class="card glass">
+                            <h3>Quick Templates</h3>
+                            <div class="template-grid">
+                                <button class="template-btn" onclick="setPrompt('Write a bubble sort algorithm')">Bubble Sort</button>
+                                <button class="template-btn" onclick="setPrompt('Write a binary search function')">Binary Search</button>
+                                <button class="template-btn" onclick="setPrompt('Write a fibonacci function using dynamic programming')">Fibonacci DP</button>
+                                <button class="template-btn" onclick="setPrompt('Write a linked list implementation')">Linked List</button>
+                                <button class="template-btn" onclick="setPrompt('Write a BFS traversal for a graph')">BFS Graph</button>
+                                <button class="template-btn" onclick="setPrompt('Write a DFS traversal for a graph')">DFS Graph</button>
+                                <button class="template-btn" onclick="setPrompt('Write a merge sort algorithm')">Merge Sort</button>
+                                <button class="template-btn" onclick="setPrompt('Write a quick sort algorithm')">Quick Sort</button>
+                                <button class="template-btn" onclick="setPrompt('Write a stack implementation')">Stack</button>
+                                <button class="template-btn" onclick="setPrompt('Write a binary search tree')">BST</button>
+                                <button class="template-btn" onclick="setPrompt('Write a hash map implementation')">Hash Map</button>
+                                <button class="template-btn" onclick="setPrompt('Write a matrix multiplication function')">Matrix Multiply</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="output-section">
+                        <div class="card glass">
+                            <div class="card-header-row">
+                                <h3>Generated Code</h3>
+                                <div class="card-actions">
+                                    <button class="btn btn-sm btn-ghost" id="btn-copy-gen" onclick="copyGenerated()">📋 Copy</button>
+                                    <button class="btn btn-sm btn-ghost" id="btn-download-gen" onclick="downloadGenerated()">⬇ Download</button>
+                                    <button class="btn btn-sm btn-accent" id="btn-analyze-gen" onclick="analyzeGenerated()">🔬 Analyze</button>
+                                </div>
+                            </div>
+                            <div id="generated-code-editor" class="code-output"></div>
+                            <div id="generation-meta" class="meta-bar hidden">
+                                <span class="meta-item" id="gen-model-type">Model: LSTM</span>
+                                <span class="meta-item" id="gen-tokens">Tokens: 0</span>
+                                <span class="meta-item" id="gen-language">Language: Python</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <!-- TAB: ANALYZE CODE -->
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <section class="tab-panel" id="panel-analyze">
+                <div class="panel-header">
+                    <h2>🔬 Code Analysis Dashboard</h2>
+                    <p>Paste your code below and receive comprehensive AI-powered analysis with detailed metrics.</p>
+                </div>
+
+                <div class="analyze-layout">
+                    <!-- Code Input -->
+                    <div class="analyze-input">
+                        <div class="card glass">
+                            <h3>Source Code Input</h3>
+                            <div id="analyze-editor" class="code-input-editor"></div>
+                            <div class="input-actions">
+                                <select id="analyze-language" class="select-input">
+                                    <option value="python">Python</option>
+                                    <option value="java">Java</option>
+                                    <option value="cpp">C++</option>
+                                </select>
+                                <button class="btn btn-primary" id="btn-analyze" onclick="handleAnalyze()">
+                                    <span class="btn-icon">🔬</span> Run Full Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div class="analysis-results hidden" id="analysis-results">
+                        <!-- Score Cards Row -->
+                        <div class="score-cards-row">
+                            <div class="score-card" id="card-quality">
+                                <div class="score-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+                                        <circle cx="60" cy="60" r="52" class="ring-fill" id="ring-quality" stroke-dasharray="0 327"/>
+                                    </svg>
+                                    <div class="score-value" id="score-quality">0</div>
+                                </div>
+                                <div class="score-label">Code Quality</div>
+                            </div>
+                            <div class="score-card" id="card-readability">
+                                <div class="score-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+                                        <circle cx="60" cy="60" r="52" class="ring-fill accent2" id="ring-readability" stroke-dasharray="0 327"/>
+                                    </svg>
+                                    <div class="score-value" id="score-readability">0</div>
+                                </div>
+                                <div class="score-label">Readability</div>
+                            </div>
+                            <div class="score-card" id="card-efficiency">
+                                <div class="score-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+                                        <circle cx="60" cy="60" r="52" class="ring-fill accent3" id="ring-efficiency" stroke-dasharray="0 327"/>
+                                    </svg>
+                                    <div class="score-value" id="score-efficiency">0</div>
+                                </div>
+                                <div class="score-label">Efficiency</div>
+                            </div>
+                            <div class="score-card" id="card-maintainability">
+                                <div class="score-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+                                        <circle cx="60" cy="60" r="52" class="ring-fill accent4" id="ring-maintainability" stroke-dasharray="0 327"/>
+                                    </svg>
+                                    <div class="score-value" id="score-maintainability">0</div>
+                                </div>
+                                <div class="score-label">Maintainability</div>
+                            </div>
+                        </div>
+
+                        <!-- Metric Cards -->
+                        <div class="metric-cards-grid">
+                            <!-- Algorithm Detection -->
+                            <div class="metric-card glass" id="card-algorithm">
+                                <div class="metric-header">
+                                    <span class="metric-icon">🧠</span>
+                                    <h3>Algorithm Detection</h3>
+                                </div>
+                                <div class="metric-value" id="algorithm-name">—</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="bar-algorithm" style="width:0%"></div>
+                                </div>
+                                <div class="metric-confidence" id="algorithm-confidence">Confidence: 0%</div>
+                                <div class="metric-detail" id="algorithm-detail"></div>
+                            </div>
+
+                            <!-- Time Complexity -->
+                            <div class="metric-card glass" id="card-complexity">
+                                <div class="metric-header">
+                                    <span class="metric-icon">⏱️</span>
+                                    <h3>Time Complexity</h3>
+                                </div>
+                                <div class="metric-value" id="complexity-value">—</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar accent2" id="bar-complexity" style="width:0%"></div>
+                                </div>
+                                <div class="metric-confidence" id="complexity-confidence">Confidence: 0%</div>
+                                <div class="metric-subvalue" id="space-complexity">Space: —</div>
+                            </div>
+
+                            <!-- Bug Risk -->
+                            <div class="metric-card glass" id="card-bugs">
+                                <div class="metric-header">
+                                    <span class="metric-icon">🐛</span>
+                                    <h3>Bug Risk Level</h3>
+                                </div>
+                                <div class="metric-value" id="bug-risk-value">—</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar bug-bar" id="bar-bugs" style="width:0%"></div>
+                                </div>
+                                <div class="metric-confidence" id="bugs-count">Bugs Found: 0</div>
+                            </div>
+
+                            <!-- Optimization -->
+                            <div class="metric-card glass" id="card-optimization">
+                                <div class="metric-header">
+                                    <span class="metric-icon">🚀</span>
+                                    <h3>Optimization Score</h3>
+                                </div>
+                                <div class="metric-value" id="optimization-value">—</div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar accent3" id="bar-optimization" style="width:0%"></div>
+                                </div>
+                                <div class="metric-confidence" id="optimization-count">Suggestions: 0</div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Section -->
+                        <div class="charts-section">
+                            <h2 class="section-title">📊 Visual Analytics</h2>
+                            <div class="charts-grid">
+                                <!-- Gauge Chart -->
+                                <div class="chart-card glass">
+                                    <h3>Overall System Score</h3>
+                                    <div class="chart-container">
+                                        <canvas id="chart-gauge"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Radar Chart -->
+                                <div class="chart-card glass">
+                                    <h3>Multi-Metric Analysis</h3>
+                                    <div class="chart-container">
+                                        <canvas id="chart-radar"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Bar Chart -->
+                                <div class="chart-card glass">
+                                    <h3>Complexity & Performance</h3>
+                                    <div class="chart-container">
+                                        <canvas id="chart-bar"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Pie Chart -->
+                                <div class="chart-card glass">
+                                    <h3>Bug Distribution</h3>
+                                    <div class="chart-container">
+                                        <canvas id="chart-pie"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Algorithm Confidence Bar -->
+                                <div class="chart-card glass wide">
+                                    <h3>Algorithm Detection Confidence</h3>
+                                    <div class="chart-container">
+                                        <canvas id="chart-algo-bar"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Results -->
+                        <div class="details-section">
+                            <!-- Bug List -->
+                            <div class="detail-card glass" id="bugs-detail">
+                                <h3>🐛 Bug Detection Results</h3>
+                                <div class="bugs-list" id="bugs-list">
+                                    <div class="empty-state">No bugs detected</div>
+                                </div>
+                            </div>
+
+                            <!-- Optimization Suggestions -->
+                            <div class="detail-card glass" id="optimization-detail">
+                                <h3>🚀 Optimization Suggestions</h3>
+                                <div class="suggestions-list" id="suggestions-list">
+                                    <div class="empty-state">No suggestions</div>
+                                </div>
+                            </div>
+
+                            <!-- Pattern Recognition -->
+                            <div class="detail-card glass" id="patterns-detail">
+                                <h3>🔮 Pattern Recognition</h3>
+                                <div class="patterns-list" id="patterns-list">
+                                    <div class="empty-state">No patterns detected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download Report -->
+                        <div class="report-actions">
+                            <button class="btn btn-primary" id="btn-download-report" onclick="downloadReport()">
+                                ⬇ Download Analysis Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <!-- TAB: COMPARE CODE -->
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <section class="tab-panel" id="panel-compare">
+                <div class="panel-header">
+                    <h2>🔀 Code Similarity Checker</h2>
+                    <p>Compare two code snippets side by side and measure structural and token similarity.</p>
+                </div>
+
+                <div class="compare-layout">
+                    <div class="compare-editors">
+                        <div class="card glass">
+                            <h3>Code Snippet 1</h3>
+                            <div id="compare-editor1" class="code-input-editor"></div>
+                        </div>
+                        <div class="card glass">
+                            <h3>Code Snippet 2</h3>
+                            <div id="compare-editor2" class="code-input-editor"></div>
+                        </div>
+                    </div>
+                    <div class="compare-actions">
+                        <select id="compare-language" class="select-input">
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                        <button class="btn btn-primary" id="btn-compare" onclick="handleCompare()">
+                            <span class="btn-icon">🔀</span> Compare
+                        </button>
+                    </div>
+                    <div class="compare-results hidden" id="compare-results">
+                        <div class="similarity-cards">
+                            <div class="similarity-card glass">
+                                <div class="sim-score" id="sim-overall">0%</div>
+                                <div class="sim-label">Overall Similarity</div>
+                                <div class="progress-bar-container"><div class="progress-bar" id="bar-sim-overall" style="width:0%"></div></div>
+                            </div>
+                            <div class="similarity-card glass">
+                                <div class="sim-score accent2" id="sim-token">0%</div>
+                                <div class="sim-label">Token Similarity</div>
+                                <div class="progress-bar-container"><div class="progress-bar accent2" id="bar-sim-token" style="width:0%"></div></div>
+                            </div>
+                            <div class="similarity-card glass">
+                                <div class="sim-score accent3" id="sim-structure">0%</div>
+                                <div class="sim-label">Structural Similarity</div>
+                                <div class="progress-bar-container"><div class="progress-bar accent3" id="bar-sim-structure" style="width:0%"></div></div>
+                            </div>
+                        </div>
+                        <div class="card glass" id="sim-details-card">
+                            <h3>Analysis Details</h3>
+                            <p id="sim-details-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <!-- TAB: UPLOAD FILE -->
+            <!-- ═════════════════════════════════════════════════════════ -->
+            <section class="tab-panel" id="panel-upload">
+                <div class="panel-header">
+                    <h2>📁 Upload Code File</h2>
+                    <p>Upload .py, .java, or .cpp files for instant AI-powered analysis.</p>
+                </div>
+
+                <div class="upload-section">
+                    <div class="upload-zone" id="upload-zone">
+                        <div class="upload-icon">📂</div>
+                        <div class="upload-text">
+                            <strong>Drag & drop your code file here</strong>
+                            <span>or click to browse</span>
+                            <span class="upload-formats">Supports: .py, .java, .cpp, .c</span>
+                        </div>
+                        <input type="file" id="file-input" accept=".py,.java,.cpp,.c,.h,.hpp" hidden>
+                    </div>
+
+                    <div class="upload-preview hidden" id="upload-preview">
+                        <div class="card glass">
+                            <div class="card-header-row">
+                                <h3 id="upload-filename">filename.py</h3>
+                                <button class="btn btn-sm btn-ghost" onclick="clearUpload()">✕ Clear</button>
+                            </div>
+                            <div id="upload-code-editor" class="code-output"></div>
+                            <button class="btn btn-primary" id="btn-analyze-upload" onclick="handleUploadAnalyze()">
+                                <span class="btn-icon">🔬</span> Analyze Uploaded File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">AI is analyzing your code...</div>
+            <div class="loader-sub">Running Deep Neural Network inference</div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- JavaScript -->
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/editor.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
